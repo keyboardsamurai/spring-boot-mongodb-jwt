@@ -1,5 +1,8 @@
 package com.github.vlsidlyarevich.config;
 
+import com.github.vlsidlyarevich.security.constants.SecurityConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -15,6 +18,7 @@ import java.io.IOException;
 
 @Component
 public class CorsFilter implements Filter {
+    private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -29,8 +33,8 @@ public class CorsFilter implements Filter {
         response.setHeader("Access-Control-Allow-Methods",
                 "POST, GET, PUT, OPTIONS, DELETE, PATCH");
         response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers", "x-auth-token, Content-Type");
-        response.setHeader("Access-Control-Expose-Headers", "x-auth-token, Content-Type");
+        response.setHeader("Access-Control-Allow-Headers", SecurityConstants.AUTH_HEADER_NAME+", Content-Type");
+        response.setHeader("Access-Control-Expose-Headers", SecurityConstants.AUTH_HEADER_NAME+", Content-Type");
 
         final HttpServletRequest request = (HttpServletRequest) req;
 
@@ -39,7 +43,7 @@ public class CorsFilter implements Filter {
                 response.getWriter().print("OK");
                 response.getWriter().flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.warn("Could not write to response",e);
             }
         } else {
             chain.doFilter(request, response);

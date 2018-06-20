@@ -1,16 +1,13 @@
 package com.github.vlsidlyarevich.security.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.vlsidlyarevich.exception.model.UserNotFoundException;
 import com.github.vlsidlyarevich.model.User;
 import com.github.vlsidlyarevich.model.UserAuthentication;
 import com.github.vlsidlyarevich.security.constants.SecurityConstants;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -24,13 +21,14 @@ import javax.servlet.http.HttpServletRequest;
 @Service
 public class JsonWebTokenAuthenticationService implements TokenAuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(JsonWebTokenAuthenticationService.class);
     @Value("${security.token.secret.key}")
     private String secretKey;
 
     private final UserDetailsService userDetailsService;
 
     @Autowired
-    public JsonWebTokenAuthenticationService(final UserDetailsService userDetailsService) {
+    public JsonWebTokenAuthenticationService(final BasicUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -47,13 +45,17 @@ public class JsonWebTokenAuthenticationService implements TokenAuthenticationSer
         return null;
     }
 
-    private Jws<Claims> parseToken(final String token) {
+    private Jws<Claims> parseToken(String token) {
+
         if (token != null) {
             try {
-                return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+                if(token.startsWith("Bearer ")){
+                    token = token.replaceFirst("Bearer ","");
+                }
+                return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(String.valueOf(token));
             } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException
                     | SignatureException | IllegalArgumentException e) {
-                return null;
+                logger.debug("Could not parse token '{}'",token,e);
             }
         }
         return null;

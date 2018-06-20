@@ -3,13 +3,14 @@ package com.github.vlsidlyarevich.service;
 import com.github.vlsidlyarevich.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface UserService {
 
     User create(User object);
 
-    User find(String id);
+    Optional<User> find(String id);
 
     User findByUsername(String userName);
 

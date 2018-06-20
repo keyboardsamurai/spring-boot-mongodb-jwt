@@ -17,11 +17,20 @@ Page `http://localhost:8080/api/hello` is secured. To access this page, you need
   username: "user",
   password: "12345"
 ```
-* **POST** request to `http://localhost:8080/api/auth`, then take token from responce and use it in header to access secured page
+
+Example: ```curl -d '{"username":"demo", "password":"demo"}' -H "Content-Type: application/json" -X POST http://localhost:8080/api/signup```
+
+* **POST** request to `http://localhost:8080/api/auth`, then take token from response and use it in header to access secured page
+
+Example: ```curl -d '{"username":"demo", "password":"demo"}' -H "Content-Type: application/json" -X POST http://localhost:8080/api/auth```
+
 * **GET** request to `http://localhost:8080/api/hello` with header:
+
 ```json
-  x-auth-token: <your token here>
+  Authorization: Bearer <your token here>
 ```
+
+Example: ```curl -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9...your full token here' http://localhost:8080/api/hello```
 
 Security is based on [AuthenticationTokenFilter](https://github.com/vlsidlyarevich/Spring-Boot-MongoDB-JWT/blob/master/src/main/java/com/github/vlsidlyarevich/security/filter/AuthenticationTokenFilter.java#L16-L33):
 

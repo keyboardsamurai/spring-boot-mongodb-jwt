@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -26,8 +27,8 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public User find(final String id) {
-        return repository.findOne(id);
+    public Optional<User> find(final String id) {
+        return repository.findById(id);
     }
 
     @Override
@@ -44,10 +45,11 @@ public class BasicUserService implements UserService {
     public User update(final String id, final User user) {
         user.setId(id);
 
-        final User saved = repository.findOne(id);
+        final Optional<User> dbUserOpt = repository.findById(id);
 
-        if (saved != null) {
-            user.setCreatedAt(saved.getCreatedAt());
+        if (dbUserOpt.isPresent()) {
+            final User dbUser = dbUserOpt.get();
+            user.setCreatedAt(dbUser.getCreatedAt());
             user.setUpdatedAt(String.valueOf(LocalDateTime.now()));
         } else {
             user.setCreatedAt(String.valueOf(LocalDateTime.now()));
@@ -58,7 +60,7 @@ public class BasicUserService implements UserService {
 
     @Override
     public String delete(final String id) {
-        repository.delete(id);
+        repository.deleteById(id);
         return id;
     }
 }
