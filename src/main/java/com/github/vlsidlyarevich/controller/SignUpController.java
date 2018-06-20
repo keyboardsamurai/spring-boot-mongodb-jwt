@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -24,16 +25,26 @@ public class SignUpController {
 
     private final PasswordEncoder passwordEncoder;
 
+
+    private final Validator validator;
+
     @Autowired
     public SignUpController(final UserService service,
-                            final ConverterFacade converterFacade, PasswordEncoder passwordEncoder) {
+                            final ConverterFacade converterFacade, PasswordEncoder passwordEncoder, Validator validator) {
         this.service = service;
         this.converterFacade = converterFacade;
         this.passwordEncoder = passwordEncoder;
+        this.validator = validator;
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> signUp(@RequestBody final UserDTO dto) {
+    @Validated
+    public ResponseEntity<?> signUp(@RequestBody final UserDTO dto,Errors errors) {
+        ValidationUtils.invokeValidator(validator,dto,errors);
+        if(errors.hasErrors()){
+            return ResponseEntity.badRequest().build();
+        }
+
         final User user = converterFacade.convert(dto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return new ResponseEntity<>(service.create(user), HttpStatus.OK);

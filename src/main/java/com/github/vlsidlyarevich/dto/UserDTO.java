@@ -1,5 +1,6 @@
 package com.github.vlsidlyarevich.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 
@@ -7,7 +8,9 @@ public class UserDTO implements Serializable {
 
     private static final long serialVersionUID = 91901774547107674L;
 
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
 
     public UserDTO() {
